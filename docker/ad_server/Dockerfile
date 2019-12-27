@@ -1,17 +1,42 @@
-FROM php:5.6-fpm
-RUN docker-php-ext-install pdo pdo_mysql mbstring mysql
-COPY conf/php.ini /usr/local/etc/php/
-RUN curl -L https://github.com/revive-adserver/revive-adserver/archive/v5.0.1.zip | tar -zx -C /var/www/html/ --strip-components=1
+FROM alpine
+MAINTAINER krish512 <krish512@hotmail.com>
 
-RUN find /var/www/html/var -type d -exec chmod 700 {} +
-RUN find /var/www/html/var -type f -exec chmod 600 {} +
-RUN chmod 700 /var/www/html/var
+WORKDIR /var/www/html
 
-RUN chown -R www-data:www-data /var/www/html/plugins
-RUN chmod 700 /var/www/html/plugins
-RUN chown -R www-data:www-data /var/www/html/www/admin/plugins
-RUN chmod 700 /var/www/html/www/admin/plugins
-RUN chown -R www-data:www-data /var/www/html/
+RUN apk --update upgrade && apk update && apk add curl ca-certificates && update-ca-certificates --fresh && apk add openssl
 
-VOLUME /var/www/html
+RUN apk --update add \
+    --repository http://dl-cdn.alpinelinux.org/alpine/edge/main \
+    --repository http://dl-cdn.alpinelinux.org/alpine/edge/community \
+        nginx \
+        gzip \
+        php7 \
+        php7-dom \
+        php7-ctype \
+        php7-curl \
+        php7-fpm \
+        php7-gd \
+        php7-intl \
+        php7-json \
+        php7-mbstring \
+        php7-mcrypt \
+        php7-mysqli \
+        php7-mysqlnd \
+        php7-opcache \
+        php7-pdo \
+        php7-pdo_mysql \
+        php7-posix \
+        php7-session \
+        php7-xml \
+        php7-iconv \
+        php7-phar \
+        php7-openssl \
+        php7-zlib \
+        php7-zip \
+    && rm -rf /var/cache/apk/*
+
+RUN wget -qO- https://download.revive-adserver.com/revive-adserver-4.2.1.tar.gz | tar xz --strip 1 \
+    && chown -R nobody:nobody . \
+    && rm -rf /var/cache/apk/*
+
 EXPOSE 9000
